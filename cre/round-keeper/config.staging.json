@@ -1,0 +1,7 @@
+{
+  "chainSelectorName": "ethereum-testnet-sepolia",
+  "roundManager": "0x9D6520b5334ef79e66f6fcE2aE54911acAb693ed",
+  "keeper": "0xc2282A61418c64613b734eb362E66B4396CF0D9c",
+  "schedule": "0 */5 * * * *",
+  "writeGasLimit": "5000000"
+}

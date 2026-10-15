@@ -9,15 +9,15 @@ size, direction, liquidation price or protection. Everything settles in **USDG**
 
 **Live on Ethereum Sepolia** · **21 contracts, all verified on Etherscan** · **79 Foundry tests passing** · real
 Chainlink prices · real FHE encryption (Fhenix CoFHE) · Uniswap v4 odds pool · 1inch Aqua backstop · zero-knowledge
-entry · rounds rolled by a Chainlink CRE workflow
+entry · rounds rolled by a Chainlink CRE workflow · token unlock radar from Tokenomist
 
 ## Demo Video
 
-[![Contingent Demo](./media/demo-cover.png)](https://youtu.be/5TD7ZywqFJs)
+[![Contingent Demo](./media/demo-cover.png)](https://youtu.be/q7s4tlTwnsE)
 
 | | |
 |---|---|
-| 🌐 **Live app** | **[contingentine.xyz](https://contingentine.xyz)**: Ethereum Sepolia, connect MetaMask (test USDG is free to mint) |
+| 🌐 **Live app** | **[contingentine.vercel.app](https://contingentine.vercel.app)**: Ethereum Sepolia, connect MetaMask (test USDG is free to mint) |
 | 📜 **Contracts** | [Ethereum Sepolia deployment](#71-second-deployment-ethereum-sepolia-redeployed-15-oct-2026) (verified on Etherscan, addresses in [`DEPLOYMENTS.md`](DEPLOYMENTS.md)) · the original [Arbitrum Sepolia deployment](#61-deployed-contracts-arbitrum-sepolia--chain-421614) |
 | 📖 **Explainer** | [`hedging-explained.html`](hedging-explained.html): hedging a perp with a prediction market, with worked numbers |
 | 🧪 **Try it yourself** | [`STEPS.md`](STEPS.md): click-by-click walkthrough of every tab |
@@ -115,7 +115,7 @@ Everything below runs against the deployed contracts on Arbitrum Sepolia, and ev
 | Tab | Features |
 |---|---|
 | **PERPS** | Wrap USDG to confidential cUSDG → deposit as encrypted collateral · **👁 Reveal**: your balance decrypted *only in your browser*, next to the ciphertext handle everyone else sees · open LONG/SHORT 1–10x · **🛡 Open protected position** (perp + event protection in one tx) · positions **masked by default** with per-position reveal · **Close both** (perp settles through async decrypt, protection premium refunded) · keeper **liquidation check** that reveals **one bit** only |
-| **MARKET** | The public prediction market: live odds, YES/NO pools, stake to move the odds · live Chainlink ETH/USD chart with the **YES / NO zones** around the strike and a "distance to strike" readout · premium calculator |
+| **MARKET** | The public prediction market: live odds, YES/NO pools, stake to move the odds · live Chainlink ETH/USD chart with the **YES / NO zones** around the strike and a "distance to strike" readout · premium calculator · **Unlock radar**: upcoming token unlocks from Tokenomist (date, value, % of market cap, who receives them), the supply shocks a long wants hedged before the date |
 | **HEDGE** | Open an **encrypted binary derivative** directly (YES/NO, notional) with a live payoff chart · your hedges list |
 | **LIQUIDITY** | LPs deposit USDG into the LP vault (`UnderwriterVault`), which is the counterparty to every hedge · reserve book (total, earmarked, free, paid out) |
 | **SETTLE** | Resolve the event from Chainlink → settle a position (only the **winning payout** is decrypted) → sweep premiums to LPs (only the **aggregate** is decrypted) → finalise and release capacity |
@@ -397,7 +397,7 @@ contingent/
 ├── src/                     Solidity (≈1,550 lines): perps, protection, hedges, vaults, market, resolvers, v4 hook
 ├── test/                    Foundry tests (8 suites, 39 tests, CofheTest mocks)
 ├── script/                  Deploy scripts · new-event-round.sh
-├── frontend/                Next.js app (live at contingentine.xyz) · E2E + live test scripts
+├── frontend/                Next.js app (live at contingentine.vercel.app) · E2E + live test scripts
 ├── demo-video/              Demo videos, scenario files, voice-over script
 ├── DEPLOYMENTS.md           Addresses + Arbiscan links + deploy notes
 ├── STEPS.md · HOW-TO.md     Manual walkthrough · usage guide

@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Contingent Diagrams</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+<style>
+  @font-face { font-family: Virgil; src: url("https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw-assets/Virgil.woff2") format("woff2"); }
+  html, body { margin: 0; background: #fff; }
+  #stage { position: relative; background: #fff; overflow: hidden; }
+  svg { position: absolute; inset: 0; }
+  .t { position: absolute; font-family: Virgil, cursive; color: #1e1e1e; white-space: pre; line-height: 1.2; transform: translate(-50%, -50%); text-align: center; }
+  .k { position: absolute; transform: translate(-50%, -50%); color: #1e1e1e; font-size: 20px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="stage"><svg id="svg"></svg></div>
+<script>
+const RED = "#e11d48", GREEN = "#059669", INK = "#1e1e1e", GREY = "#9a9a9a";
+const which = new URLSearchParams(location.search).get("d") || "concept";
+const stage = document.getElementById("stage"), svg = document.getElementById("svg");
+let rc;
+let seed = 7;
+const opt = (o = {}) => ({ roughness: 1.1, bowing: 1.2, strokeWidth: 1.5, stroke: INK, seed: seed++, ...o });
+
+function size(w, h) {
+  stage.style.width = w + "px"; stage.style.height = h + "px";
+  svg.setAttribute("width", w); svg.setAttribute("height", h);
+  rc = rough.svg(svg);
+}
+const add = (n) => (svg.appendChild(n), n);
+function text(x, y, s, px = 16, o = {}) {
+  const d = document.createElement("div");
+  d.className = "t"; d.textContent = s;
+  d.style.left = x + "px"; d.style.top = y + "px"; d.style.fontSize = px + "px";
+  if (o.color) d.style.color = o.color;
+  if (o.align === "left") { d.style.transform = "translate(0,-50%)"; d.style.textAlign = "left"; }
+  if (o.bg) { d.style.background = "#fff"; d.style.padding = "0 4px"; }
+  stage.appendChild(d);
+}
+function tex(x, y, s, px = 20) {
+  const d = document.createElement("div");
+  d.className = "k"; d.style.left = x + "px"; d.style.top = y + "px"; d.style.fontSize = px + "px";
+  katex.render(s, d, { throwOnError: false });
+  stage.appendChild(d);
+}
+function box(x, y, w, h, label, px = 15, o = {}) {
+  add(rc.rectangle(x, y, w, h, opt(o)));
+  if (label) text(x + w / 2, y + h / 2, label, px, { color: o.textColor });
+}
+function stack(x, y, w, labels, o = {}) {
+  labels.forEach((l, i) => box(x, y + i * 22, w, 22, l, 12, o));
+}
+function person(x, y, label, s = 1) {
+  add(rc.circle(x, y - 38 * s, 34 * s, opt({ fill: INK, fillStyle: "solid", roughness: 0.6 })));
+  add(rc.path(`M ${x - 36 * s} ${y + 34 * s} C ${x - 36 * s} ${y - 14 * s}, ${x + 36 * s} ${y - 14 * s}, ${x + 36 * s} ${y + 34 * s} Z`,
+    opt({ fill: INK, fillStyle: "solid", roughness: 0.6 })));
+  text(x, y + 52 * s, label, 15);
+}
+function head(p, q, color) {
+  const a = Math.atan2(p[1] - q[1], p[0] - q[0]), L = 13, s = 0.45;
+  add(rc.line(p[0], p[1], p[0] - L * Math.cos(a - s), p[1] - L * Math.sin(a - s), opt({ stroke: color, roughness: 0.5 })));
+  add(rc.line(p[0], p[1], p[0] - L * Math.cos(a + s), p[1] - L * Math.sin(a + s), opt({ stroke: color, roughness: 0.5 })));
+}
+// points: [[x,y],...]; o: {red, dashed, both}
+function arrow(pts, o = {}) {
+  const color = o.red ? RED : o.grey ? GREY : INK;
+  const st = opt({ stroke: color, strokeWidth: o.red ? 2.4 : 1.5, roughness: 0.9 });
+  if (o.dashed) st.strokeLineDash = [8, 7];
+  add(pts.length === 2 ? rc.line(...pts[0], ...pts[1], st) : rc.curve(pts, st));
+  if (!o.none) head(pts[pts.length - 1], pts[pts.length - 2], color);
+  if (o.both) head(pts[0], pts[1], color);
+}
+function mark(x, y, d) { // Contingent mark: ink rounded square with a white C
+  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  g.innerHTML = `<rect x="${x - d / 2}" y="${y - d / 2}" width="${d}" height="${d}" rx="${d * 0.22}" fill="#0f172a"/>` +
+    `<text x="${x}" y="${y + d * 0.2}" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="700" font-size="${d * 0.56}" fill="#fff">C</text>`;
+  svg.appendChild(g);
+}
+function icon(x, y, d, name) { // brand logo centred on (x, y), d px wide
+  const im = document.createElementNS("http://www.w3.org/2000/svg", "image");
+  im.setAttribute("href", `logos/${name}.svg`);
+  im.setAttribute("x", x - d / 2); im.setAttribute("y", y - d / 2);
+  im.setAttribute("width", d); im.setAttribute("height", d);
+  svg.appendChild(im);
+}
+function wide(x, y, w, h, name) { // wordmark logo centred on (x, y)
+  const im = document.createElementNS("http://www.w3.org/2000/svg", "image");
+  im.setAttribute("href", `logos/${name}.svg`);
+  im.setAttribute("x", x - w / 2); im.setAttribute("y", y - h / 2);
+  im.setAttribute("width", w); im.setAttribute("height", h);
+  svg.appendChild(im);
+}
+function bubble(x, y, w, h, tailX) {
+  add(rc.path(`M ${x} ${y} L ${x + w} ${y} L ${x + w} ${y + h} L ${tailX + 14} ${y + h} L ${tailX} ${y + h + 26} L ${tailX - 2} ${y + h} L ${x} ${y + h} Z`, opt()));
+}
+
+
+// ─────────────────────────────── concept ───────────────────────────────
+function concept() {
+  size(940, 790);
+  text(470, 120, "Contingent Concept", 40);
+
+  person(190, 500, "Trader");
+  bubble(40, 300, 200, 100, 160);
+  text(140, 324, "Long ETH 5x", 14);
+  text(140, 368, "but cap my\ncrash loss", 16);
+
+  mark(470, 280, 76);
+  text(470, 228, "🔒 Fhenix FHE", 12, { color: "#555" });
+
+  icon(760, 250, 48, "link");
+  text(760, 292, "Chainlink ETH / USD", 13);
+
+  person(760, 500, "Liquidity providers");
+  text(760, 572, "(the other side of every hedge)", 11, { color: GREY });
+
+  // the prediction market
+  box(370, 570, 200, 96, "", 14);
+  text(470, 590, "Prediction market", 15);
+  text(470, 616, "\"ETH ≥ $2,500 at expiry?\"", 12);
+  text(470, 642, "YES 65%  ·  NO 35%", 13);
+  icon(660, 690, 36, "uni");
+  text(660, 724, "odds live in a\nUniswap v4 pool", 11, { color: "#555" });
+  arrow([[642, 680], [600, 660], [572, 640]], { grey: true, dashed: true });
+
+  // ① open an encrypted long
+  arrow([[225, 445], [300, 320], [428, 282]]);
+  text(296, 290, "① encrypted long", 14, { bg: true });
+  // ② hedge on the prediction market, same tx
+  arrow([[445, 320], [425, 450], [430, 568]]);
+  text(282, 604, "② hedge: buy NO\n(side hidden, same tx)", 13, { bg: true });
+  // ③ market odds set the premium
+  arrow([[515, 568], [520, 450], [497, 322]], { dashed: true });
+  text(632, 520, "③ odds = premium\nNO costs 35 per 100", 13);
+  // ④ LPs back the payout
+  arrow([[735, 450], [650, 380], [512, 300]], { grey: true, dashed: true });
+  text(695, 372, "④ LPs back payouts", 12, { color: "#555" });
+  // ⑤ Chainlink resolves
+  arrow([[728, 256], [514, 272]], { dashed: true });
+  text(620, 250, "⑤ resolves at expiry", 12);
+  // ⑥ crash: NO wins, the hedge pays
+  arrow([[700, 470], [470, 420], [252, 482]], { red: true });
+  text(335, 500, "⑥ crash → NO wins", 15, { color: RED, bg: true });
+  text(335, 524, "hedge pays: −100 becomes −35", 11, { color: GREY, bg: true });
+}
+
+// ─────────────────────────────── full ───────────────────────────────
+function full() {
+  size(1400, 1000);
+  text(700, 70, "The Contingent we've built", 40);
+  text(700, 120, "Fhenix FHE + Uniswap v4 odds + Chainlink + 1inch Aqua + ZK entry", 22);
+
+  person(80, 470, "Trader");
+  text(80, 545, "@cofhe/sdk encrypts\ninputs in the browser", 11, { color: GREY });
+
+  // ZK entry
+  box(200, 180, 270, 120, "", 13);
+  text(335, 200, "PRIVATE · ZK gateway", 14);
+  text(335, 252, "deposit a 100 / 1,000 USDG note from wallet A\nprove it from wallet B (Groth16, ~0.3 s)\n→ arrives as encrypted cUSDG", 11);
+  arrow([[105, 420], [140, 280], [198, 245]], { grey: true });
+  text(118, 220, "① optional:\nhide who", 12, { color: "#555" });
+
+  // frame
+  add(rc.rectangle(520, 170, 520, 560, opt({ strokeLineDash: [10, 8], roughness: 0.6 })));
+  add(rc.rectangle(538, 188, 484, 524, opt({ fill: "#eef6f2", fillStyle: "hachure", hachureGap: 9, stroke: "#c6ddd2", hachureAngle: -41, roughness: 0.6 })));
+  mark(548, 750, 34);
+  text(574, 750, "Ethereum Sepolia", 13, { color: "#555", align: "left" });
+
+  const white = { fill: "#fff", fillStyle: "solid" };
+  box(570, 215, 190, 95, "", 14, white); text(665, 238, "ProtectedPerp", 16); text(665, 280, "perp + its prediction-\nmarket hedge in one tx", 11);
+  box(800, 215, 190, 95, "", 14, white); text(895, 238, "ConfidentialPerp", 16); text(895, 280, "ETH-PERP 1–10x\n🔒 size, side, collateral", 11);
+  box(570, 365, 190, 95, "", 14, white); text(665, 386, "ContingentHedge", 16); text(665, 430, "prediction-market hedge\nYES / NO on \"ETH ≥ strike\"\n🔒 side = FHE.not(isLong)", 11);
+  box(800, 365, 190, 95, "", 14, white); text(895, 388, "LP vault", 16); text(895, 430, "the other side of every hedge\nbacks every payout", 11);
+  box(570, 525, 190, 95, "", 14, white); text(665, 548, "SettlementRouter", 16); text(665, 590, "pays winners · only a\nwinning payout is decrypted", 11);
+  box(800, 525, 190, 95, "", 14, white); text(895, 548, "RoundManager", 16); text(895, 590, "resolves the expired round\nopens the next (strike −5%)", 11);
+  arrow([[762, 262], [798, 262]]);
+  arrow([[665, 312], [665, 363]]);
+  arrow([[762, 412], [798, 412]]);
+  arrow([[850, 462], [700, 523]], { grey: true });
+
+  // trader → ProtectedPerp
+  arrow([[118, 470], [330, 440], [568, 280]]);
+  text(330, 420, "② encrypted long + collateral", 13, { bg: true });
+
+  // right column: Chainlink, CRE, odds pool, Aqua
+  icon(1150, 205, 40, "link");
+  text(1250, 205, "ETH / USD feed", 14);
+  arrow([[1128, 212], [992, 250]], { dashed: true });
+  text(1062, 214, "mark", 11, { bg: true });
+  box(1100, 260, 230, 70, "", 13);
+  text(1215, 282, "Chainlink CRE round keeper", 13);
+  text(1215, 310, "CRE simulator · real txs", 11, { color: "#555" });
+  arrow([[1100, 320], [1060, 450], [992, 560]], { dashed: true });
+  text(1072, 470, "roll", 11, { bg: true });
+
+  icon(1150, 395, 44, "uni");
+  text(1262, 386, "prediction market odds", 13);
+  text(1262, 406, "YES / NO pool on Uniswap v4", 11, { color: "#555" });
+  arrow([[1126, 398], [1060, 340], [790, 338], [722, 362]], { dashed: true });
+  text(905, 338, "③ odds = premium", 12, { bg: true });
+
+  wide(1210, 555, 74, 25, "aqua");
+  text(1210, 595, "AquaReserve: makers' USDG\nstays in their own wallets", 11);
+  arrow([[1150, 615], [1000, 680], [762, 612]], { dashed: true, grey: true });
+  text(1000, 700, "top-up", 11, { color: "#555" });
+
+  // formulas
+  tex(1210, 700, String.raw`\text{liq} = \text{entry}\times\big(1 - \tfrac{1 - 5\%}{\text{lev}}\big)`, 15);
+  tex(1210, 745, String.raw`\text{premium} = \text{cover}\times p_{\text{side}}`, 15);
+  tex(1210, 785, String.raw`\text{net} = \text{perp PnL} + \text{payout} - \text{premium}`, 15);
+
+  // ④ crash payout (red)
+  arrow([[568, 600], [330, 680], [110, 572]], { red: true });
+  text(300, 715, "④ ETH crashes to $2,150 → NO wins → hedge pays", 14, { color: RED, bg: true });
+
+  // example + privacy
+  box(40, 820, 560, 150, "", 13);
+  text(320, 842, "Example (the demo trade)", 15);
+  text(320, 905, "LONG ETH 5x · 100 USDG · entry $2,720 · liquidation ≈ $2,203\nprotection: NO on \"ETH ≥ $2,500\" · cover 100 · YES odds 65% → premium 35\ncrash to $2,150: perp −100, protection +65  →  −35 instead of −100\nrally to $2,938: perp +40, protection −35  →  +5", 12);
+  box(660, 820, 380, 150, "", 13);
+  text(850, 842, "What is hidden", 15);
+  text(850, 905, "🔒 collateral, size, side, liquidation price\n🔒 protection side and cover\n🌐 odds, strike, leverage, entry price\nkeepers learn one bit: liquidatable or not", 12);
+}
+
+document.fonts.load("16px Virgil").then(() => {
+  ({ concept, full })[which]();
+  document.body.dataset.ready = "1";
+});
+</script>
+</body>
+</html>

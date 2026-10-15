@@ -1,0 +1,47 @@
+03:01:29 round is 2
+status               1 (success)
+03:01:38 duration reset to 1 day for round 3
+▶ connect CoFHE client … ✓ 0.9s
+wallet 0x204a73e8303F3d09B12062dEdAA74B1CDA6E167d · round 2 · odds 84.51% YES
+▶ mint + wrap 200 USDG … ✓ 92.7s
+▶ deposit 200 encrypted collateral … ✓ 22.3s
+▶ open hedge: YES 200 (encrypted size and side) … ✓ 26.0s  2
+
+✅ hedge #2 open on round event 0x79dc3f4be5427b8ba1935604ec0c7975546cf02bbe53c7b02e018f4ebef6e0a6
+03:04:16 opened hedge id=2
+03:27:21 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:27:27Z [USER LOG] Round 2: nothing to do
+03:29:33 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:29:38Z [USER LOG] Round 2: nothing to do
+03:31:43 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:31:48Z [USER LOG] Round 2: nothing to do
+03:33:54 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:34:00Z [USER LOG] Round 2: nothing to do
+03:36:05 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:36:11Z [USER LOG] Round 2: nothing to do
+03:38:17 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:38:22Z [USER LOG] Round 2: nothing to do
+03:40:28 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:40:34Z [USER LOG] Round 2: nothing to do
+03:42:39 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:42:47Z [USER LOG] Round 2: nothing to do
+03:44:52 round 2 due (pending=1), running CRE workflow
+2026-10-12T03:44:58Z [USER LOG] Round 2: resolve the expired round and open the next
+2026-10-12T03:45:13Z [USER LOG] Round 2 rolled: 0x1c55588dd6b994c95e5b81319a32fe9db4174390d104930b9d3108e597322e03
+03:47:18 round is 3
+▶ connect CoFHE client … ✓ 0.9s
+▶ request settlement of #2 … ✓ 12.2s
+▶ decrypt the payout off-chain … payout 200.0 USDG
+✓ 1.2s  [object Object]
+▶ verify on-chain + pay the owner … ✓ 24.9s
+
+✅ #2 settled: payout 200.0 USDG · owner 0x204a73e8303F3d09B12062dEdAA74B1CDA6E167d received 200.0 USDG · vault reserve fell by 200.0
+03:48:17 settle of winning hedge done (exit 0)
+▶ connect CoFHE client … ✓ 1.2s
+▶ request settlement of #1 … ✓ 21.1s
+▶ decrypt the payout off-chain … payout 0.0 USDG
+✓ 0.9s  [object Object]
+▶ verify on-chain + pay the owner … ✓ 7.6s
+
+✅ #1 settled: payout 0.0 USDG · owner 0x76B6419BD13F807466CbA81C56516b4FcC922a37 received 0.0 USDG · vault reserve fell by 0.0
+03:48:51 settle of round-1 protection done (exit 0)

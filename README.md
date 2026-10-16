@@ -110,7 +110,8 @@ the cover to your liquidation loss and pick a strike near your liquidation price
 
 ## 4. What's live
 
-Everything below runs against the deployed contracts on Arbitrum Sepolia, and every step is shown in the demo video.
+Everything below runs against the deployed contracts on Ethereum Sepolia (it ran on Arbitrum Sepolia first), and every
+step is shown in the demo video.
 
 | Tab | Features |
 |---|---|
@@ -122,7 +123,8 @@ Everything below runs against the deployed contracts on Arbitrum Sepolia, and ev
 
 Verified end to end: an automated live-chain test (`frontend/scripts/live-e2e.mjs`), a browser E2E
 (`frontend/scripts/ui-e2e.mjs`), a manual MetaMask click-through of every tab, and the recorded demo takes.
-All of them run real transactions and real FHE on Arbitrum Sepolia.
+All of them run real transactions and real FHE: first on Arbitrum Sepolia, then again on Ethereum Sepolia after
+the 15 Oct redeploy (browser check and the recorded demo).
 
 ## 5. Privacy model
 
